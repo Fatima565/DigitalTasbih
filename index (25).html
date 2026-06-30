@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Free Online Tasbih Counter | DigitalTasbih</title>
+<meta name="description" content="Free online tasbih counter, digital tasbeeh, durood counter, zikr counter, Islamic dua journal and shukr journal — DigitalTasbih.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#FBF6EC;
+    --cream-card:#FFFFFF;
+    --sage:#8FA889;
+    --sage-dark:#5F7A5C;
+    --sage-soft:#E3EBE0;
+    --blush:#F4C9D6;
+    --blush-deep:#E8A9BC;
+    --gold:#D7B26D;
+    --gold-soft:#F0DDB3;
+    --ink:#3A4536;
+    --ink-soft:#6B7A66;
+    --shadow: 0 8px 24px rgba(95,122,92,0.12);
+    --radius: 22px;
+    --radius-sm: 14px;
+  }
+  [data-theme="night"]{
+    --cream:#15221A;
+    --cream-card:#1E2F24;
+    --sage:#6E9168;
+    --sage-dark:#9BC094;
+    --sage-soft:#26392C;
+    --blush:#E8A9BC;
+    --blush-deep:#D98AA3;
+    --gold:#E0BE7E;
+    --gold-soft:#3A3320;
+    --ink:#EDEAE0;
+    --ink-soft:#AEBBA8;
+    --shadow: 0 8px 28px rgba(0,0,0,0.35);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    font-family:'Quicksand', sans-serif;
+    background:var(--cream);
+    color:var(--ink);
+    min-height:100vh;
+    transition:background 0.4s ease, color 0.4s ease;
+    -webkit-font-smoothing:antialiased;
+  }
+  .display{font-family:'Amiri', serif;}
+  #app{
+    max-width:480px;
+    margin:0 auto;
+    min-height:100vh;
+    position:relative;
+    padding-bottom:88px;
+    overflow-x:hidden;
+  }
+  /* ---------- Top bar ---------- */
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 20px 8px;
+  }
+  .brand{
+    font-family:'Amiri', serif;
+    font-style:italic;
+    font-size:22px;
+    color:var(--sage-dark);
+    display:flex; align-items:center; gap:6px;
+  }
+  .topbar-actions{display:flex; gap:10px;}
+  .icon-btn{
+    width:38px; height:38px; border-radius:50%;
+    background:var(--cream-card); border:1px solid var(--sage-soft);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; font-size:17px; box-shadow:var(--shadow);
+    transition:transform .2s ease;
+  }
+  .icon-btn:active{transform:scale(0.9);}
+  /* ---------- stars/moon ambient bg on night ---------- */
+  .stars{position:fixed; inset:0; pointer-events:none; z-index:0; opacity:0; transition:opacity .6s ease;}
+  [data-theme="night"] .stars{opacity:1;}
+  .star{position:absolute; width:2px; height:2px; background:#fff; border-radius:50%; animation:twinkle 3s infinite ease-in-out;}
+  @keyframes twinkle{0%,100%{opacity:.2;} 50%{opacity:1;}}
+
+  main{position:relative; z-index:1; padding:0 18px;}
+  .screen{display:none; animation:fadeIn .35s ease;}
+  .screen.active{display:block;}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);}}
+
+  .card{
+    background:var(--cream-card);
+    border-radius:var(--radius);
+    padding:20px;
+    box-shadow:var(--shadow);
+    margin-bottom:16px;
+  }
+  h1.page-title{font-family:'Amiri',serif; font-size:26px; color:var(--sage-dark); margin-bottom:4px;}
+  .subtle{color:var(--ink-soft); font-size:13px;}
+
+  /* ---------- Home ---------- */
+  .greeting{font-family:'Amiri', serif; font-style:italic; font-size:24px; color:var(--sage-dark); margin-bottom:2px;}
+  .greeting-sub{color:var(--ink-soft); font-size:14px; margin-bottom:18px;}
+  .stat-row{display:flex; gap:12px; margin-bottom:16px;}
+  .stat-box{
+    flex:1; background:var(--sage-soft); border-radius:var(--radius-sm);
+    padding:14px; text-align:center;
+  }
+  .stat-num{font-family:'Amiri',serif; font-size:26px; color:var(--sage-dark); font-weight:700;}
+  .stat-label{font-size:11px; color:var(--ink-soft); margin-top:2px;}
+  .quick-actions{display:flex; gap:10px; margin-bottom:16px;}
+  .quick-btn{
+    flex:1; background:var(--sage); color:#fff; border:none; border-radius:16px;
+    padding:14px 8px; font-family:'Quicksand'; font-weight:600; font-size:12.5px;
+    cursor:pointer; box-shadow:var(--shadow); transition:transform .15s ease;
+  }
+  .quick-btn:active{transform:scale(0.95);}
+  .quick-btn.alt{background:var(--blush-deep);}
+  .quick-btn.alt2{background:var(--gold);}
+  .quote-card{
+    background:linear-gradient(135deg, var(--sage-soft), var(--gold-soft));
+    border-radius:var(--radius); padding:18px; text-align:center;
+  }
+  .quote-text{font-family:'Amiri',serif; font-style:italic; font-size:15px; color:var(--ink); line-height:1.6;}
+
+  /* mini garden on home */
+  .mini-garden{
+    display:flex; align-items:flex-end; justify-content:center; gap:6px;
+    height:70px; margin-top:10px;
+  }
+
+  /* ---------- Tasbih counter ---------- */
+  .zikr-tabs{display:flex; gap:8px; overflow-x:auto; padding-bottom:8px; margin-bottom:14px;}
+  .zikr-tab{
+    flex:0 0 auto; padding:8px 14px; border-radius:20px; font-size:12.5px;
+    background:var(--sage-soft); color:var(--sage-dark); white-space:nowrap; cursor:pointer;
+    border:2px solid transparent; font-weight:600;
+  }
+  .zikr-tab.active{background:var(--sage); color:#fff;}
+  .counter-display{
+    text-align:center; padding:26px 0 10px;
+  }
+  .counter-name{font-family:'Amiri',serif; font-size:20px; color:var(--ink-soft); margin-bottom:6px;}
+  .counter-num{font-family:'Amiri',serif; font-size:72px; font-weight:700; color:var(--sage-dark); line-height:1;}
+  .counter-goal-label{font-size:12.5px; color:var(--ink-soft); margin-top:6px;}
+  .progress-track{
+    width:100%; height:8px; border-radius:8px; background:var(--sage-soft); margin-top:14px; overflow:hidden;
+  }
+  .progress-fill{height:100%; background:linear-gradient(90deg, var(--gold), var(--sage)); border-radius:8px; transition:width .3s ease;}
+  .tap-btn{
+    width:170px; height:170px; border-radius:50%; margin:26px auto 10px;
+    background:radial-gradient(circle at 35% 30%, var(--blush), var(--blush-deep));
+    border:6px solid var(--cream-card); box-shadow:0 10px 30px rgba(232,169,188,0.45);
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+    font-family:'Amiri',serif; font-size:17px; color:#fff; font-weight:700;
+    user-select:none; -webkit-tap-highlight-color:transparent;
+    transition:transform .12s ease;
+  }
+  .tap-btn:active{transform:scale(0.92);}
+  .goal-row{display:flex; gap:8px; justify-content:center; margin:14px 0;}
+  .goal-chip{
+    padding:7px 16px; border-radius:16px; font-size:12.5px; font-weight:600;
+    background:var(--cream-card); border:2px solid var(--sage-soft); color:var(--ink-soft); cursor:pointer;
+  }
+  .goal-chip.active{border-color:var(--gold); color:var(--gold); background:var(--gold-soft);}
+  .counter-actions{display:flex; gap:10px; justify-content:center; margin-top:6px;}
+  .ghost-btn{
+    background:transparent; border:1.5px solid var(--sage-soft); color:var(--ink-soft);
+    padding:9px 18px; border-radius:14px; font-family:'Quicksand'; font-weight:600; font-size:12.5px; cursor:pointer;
+  }
+  .add-custom-row{display:flex; gap:8px; margin-top:10px;}
+  .add-custom-row input{
+    flex:1; border:1.5px solid var(--sage-soft); border-radius:14px; padding:10px 14px;
+    font-family:'Quicksand'; font-size:13px; background:var(--cream); color:var(--ink);
+  }
+  .add-custom-row button{
+    background:var(--sage); color:#fff; border:none; border-radius:14px; padding:10px 16px; font-weight:700; cursor:pointer;
+  }
+
+  /* Noor Garden */
+  .garden-bed{
+    position:relative; height:150px; background:linear-gradient(180deg, transparent, var(--sage-soft) 85%);
+    border-radius:var(--radius); margin-top:16px; overflow:hidden;
+    display:flex; align-items:flex-end; justify-content:space-around; padding:0 6px 10px;
+  }
+  .flower{
+    font-size:0; width:18px; height:0; transform-origin:bottom center;
+    transition:height .5s cubic-bezier(.34,1.56,.64,1), transform .5s ease;
+  }
+  .flower.bloomed{height:46px;}
+  .flower .stem{width:3px; height:100%; background:var(--sage); margin:0 auto; border-radius:2px;}
+  .flower .bloom{
+    width:20px; height:20px; border-radius:50%;
+    background:radial-gradient(circle at 35% 35%, var(--gold), var(--blush-deep));
+    position:relative; top:-20px; left:-8.5px;
+    transform:scale(0); transition:transform .4s ease .15s;
+  }
+  .flower.bloomed .bloom{transform:scale(1);}
+
+  /* ---------- Dua Pocket ---------- */
+  .cat-filters{display:flex; gap:8px; overflow-x:auto; margin-bottom:14px; padding-bottom:4px;}
+  .dua-card{
+    background:var(--cream-card); border-radius:var(--radius-sm); padding:16px; margin-bottom:12px;
+    border-left:4px solid var(--blush-deep); box-shadow:var(--shadow);
+  }
+  .dua-card.accepted{border-left-color:var(--gold);}
+  .dua-meta{display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;}
+  .dua-cat{font-size:11px; font-weight:700; color:var(--sage-dark); background:var(--sage-soft); padding:3px 10px; border-radius:10px;}
+  .dua-date{font-size:11px; color:var(--ink-soft);}
+  .dua-text{font-size:14.5px; line-height:1.5; margin-bottom:10px; white-space:pre-wrap;}
+  .dua-actions{display:flex; gap:8px;}
+  .mini-btn{
+    border:none; background:var(--sage-soft); color:var(--sage-dark); padding:6px 12px;
+    border-radius:10px; font-size:11.5px; font-weight:700; cursor:pointer;
+  }
+  .mini-btn.accept{background:var(--gold-soft); color:#8a6a23;}
+  .mini-btn.danger{background:#F4D9DC; color:#a04256;}
+  .accepted-badge{font-size:11px; color:#8a6a23; font-weight:700; margin-top:4px;}
+
+  .fab{
+    position:fixed; bottom:96px; right:calc(50% - 240px + 18px);
+    width:54px; height:54px; border-radius:50%; background:var(--sage); color:#fff;
+    border:none; font-size:26px; box-shadow:0 8px 20px rgba(95,122,92,0.4); cursor:pointer; z-index:5;
+  }
+  @media (max-width:480px){ .fab{right:18px;} }
+
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(0,0,0,0.45); display:none;
+    align-items:flex-end; justify-content:center; z-index:50;
+  }
+  .modal-overlay.active{display:flex;}
+  .modal{
+    background:var(--cream); width:100%; max-width:480px; border-radius:24px 24px 0 0;
+    padding:24px 20px 28px; max-height:85vh; overflow-y:auto;
+  }
+  .modal h3{font-family:'Amiri',serif; color:var(--sage-dark); font-size:20px; margin-bottom:14px;}
+  .field-label{font-size:12px; font-weight:700; color:var(--ink-soft); margin:12px 0 6px;}
+  textarea, select, input[type=text]{
+    width:100%; border:1.5px solid var(--sage-soft); border-radius:14px; padding:12px 14px;
+    font-family:'Quicksand'; font-size:14px; background:var(--cream-card); color:var(--ink); resize:vertical;
+  }
+  .modal-btns{display:flex; gap:10px; margin-top:18px;}
+  .primary-btn{
+    flex:1; background:var(--sage); color:#fff; border:none; border-radius:16px; padding:13px;
+    font-weight:700; font-family:'Quicksand'; cursor:pointer;
+  }
+  .secondary-btn{
+    flex:1; background:transparent; border:1.5px solid var(--sage-soft); color:var(--ink-soft);
+    border-radius:16px; padding:13px; font-weight:700; cursor:pointer;
+  }
+
+  /* ---------- Shukr Nama ---------- */
+  .prompt-block{margin-bottom:16px;}
+  .prompt-q{font-family:'Amiri',serif; font-style:italic; font-size:15px; color:var(--sage-dark); margin-bottom:6px;}
+  .shukr-entry{
+    background:var(--cream-card); border-radius:var(--radius-sm); padding:14px; margin-bottom:10px; box-shadow:var(--shadow);
+  }
+  .shukr-entry .dua-date{margin-bottom:6px; display:block;}
+  .success-msg{
+    text-align:center; padding:16px; background:var(--gold-soft); border-radius:var(--radius-sm);
+    font-family:'Amiri',serif; font-style:italic; color:#8a6a23; margin-top:10px;
+  }
+
+  /* ---------- My Journey ---------- */
+  .journey-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;}
+  .journey-box{background:var(--cream-card); border-radius:var(--radius-sm); padding:16px; box-shadow:var(--shadow); text-align:center;}
+  .journey-num{font-family:'Amiri',serif; font-size:28px; color:var(--sage-dark); font-weight:700;}
+  .journey-label{font-size:11.5px; color:var(--ink-soft); margin-top:2px;}
+  .section-sub{font-family:'Amiri',serif; font-size:17px; color:var(--sage-dark); margin:18px 0 10px;}
+
+  /* ---------- bottom nav ---------- */
+  .bottom-nav{
+    position:fixed; bottom:0; left:50%; transform:translateX(-50%);
+    width:100%; max-width:480px; background:var(--cream-card);
+    border-top:1px solid var(--sage-soft); display:flex; justify-content:space-around;
+    padding:10px 6px calc(10px + env(safe-area-inset-bottom)); z-index:10; box-shadow:0 -4px 18px rgba(0,0,0,0.06);
+  }
+  .nav-item{
+    display:flex; flex-direction:column; align-items:center; gap:3px; cursor:pointer;
+    color:var(--ink-soft); font-size:10.5px; font-weight:600; flex:1;
+  }
+  .nav-item .nav-icon{font-size:19px;}
+  .nav-item.active{color:var(--sage-dark);}
+
+  /* ---------- bismillah gate ---------- */
+  .gate{
+    position:fixed; inset:0; background:var(--cream); z-index:100;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:30px;
+  }
+  .gate-moon{font-size:54px; margin-bottom:18px;}
+  .gate h2{font-family:'Amiri',serif; font-style:italic; font-size:26px; color:var(--sage-dark); margin-bottom:10px;}
+  .gate p{color:var(--ink-soft); font-size:14px; margin-bottom:28px; max-width:300px;}
+  .gate-btn{
+    background:var(--sage); color:#fff; border:none; padding:15px 34px; border-radius:18px;
+    font-family:'Amiri',serif; font-size:17px; cursor:pointer; box-shadow:var(--shadow);
+  }
+
+  /* audio bar */
+  .audio-bar{
+    display:flex; align-items:center; gap:10px; background:var(--cream-card);
+    border-radius:16px; padding:10px 14px; box-shadow:var(--shadow); margin-bottom:16px;
+  }
+  .audio-bar input[type=range]{flex:1; accent-color:var(--sage);}
+  .play-toggle{
+    width:34px; height:34px; border-radius:50%; background:var(--sage); color:#fff; border:none; cursor:pointer; font-size:13px;
+  }
+
+  ::-webkit-scrollbar{display:none;}
+</style>
+</head>
+<body data-theme="day">
+
+<div class="stars" id="stars"></div>
+
+<!-- Bismillah Gate -->
+<div class="gate" id="gate">
+  <div class="gate-moon">🌙</div>
+  <h2>Assalamu Alaikum</h2>
+  <p>Welcome to DigitalTasbih — your peaceful space for zikr, dua and daily shukr. Begin with His name.</p>
+  <button class="gate-btn" onclick="beginBismillah()">Begin with Bismillah</button>
+</div>
+
+<div id="app">
+  <div class="topbar">
+    <div class="brand">🌙 DigitalTasbih</div>
+    <div class="topbar-actions">
+      <div class="icon-btn" onclick="toggleAudio()" id="audioIconBtn">🎵</div>
+      <div class="icon-btn" onclick="toggleTheme()" id="themeIconBtn">🌤️</div>
+    </div>
+  </div>
+
+  <main>
+
+    <!-- HOME -->
+    <section class="screen active" id="screen-home">
+      <div class="greeting" id="greetingText">Assalamu Alaikum</div>
+      <div class="greeting-sub">May your heart find peace today.</div>
+
+      <div class="stat-row">
+        <div class="stat-box">
+          <div class="stat-num" id="homeTodayCount">0</div>
+          <div class="stat-label">Today's Zikr</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num" id="homeStreak">0</div>
+          <div class="stat-label">Day Streak 🔥</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-sub" style="margin-top:0;">Noor Garden 🌸</div>
+        <div class="mini-garden" id="miniGarden"></div>
+        <div class="subtle" style="text-align:center; margin-top:8px;">Your garden grows with every zikr</div>
+      </div>
+
+      <div class="quick-actions">
+        <button class="quick-btn" onclick="goTo('tasbih')">📿 Start Tasbih</button>
+        <button class="quick-btn alt" onclick="openDuaModal()">🤲 Add Dua</button>
+        <button class="quick-btn alt2" onclick="goTo('shukr')">🤍 Write Shukr</button>
+      </div>
+
+      <div class="quote-card">
+        <div class="quote-text" id="dailyQuote">"Verily, in the remembrance of Allah do hearts find rest." — Qur'an 13:28</div>
+      </div>
+    </section>
+
+    <!-- TASBIH -->
+    <section class="screen" id="screen-tasbih">
+      <h1 class="page-title">Tasbih Counter 📿</h1>
+      <div class="subtle" style="margin-bottom:14px;">Free Online Tasbih Counter — Durood, SubhanAllah, Alhamdulillah & more</div>
+
+      <div class="zikr-tabs" id="zikrTabs"></div>
+
+      <div class="card">
+        <div class="counter-display">
+          <div class="counter-name" id="activeZikrName">SubhanAllah</div>
+          <div class="counter-num" id="activeZikrCount">0</div>
+          <div class="counter-goal-label" id="goalLabel">Goal: 33</div>
+          <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+        </div>
+
+        <div class="tap-btn" id="tapBtn" onclick="tapZikr()">Tap to<br>Count</div>
+
+        <div class="goal-row">
+          <div class="goal-chip" data-goal="33" onclick="setGoal(33)">33</div>
+          <div class="goal-chip" data-goal="100" onclick="setGoal(100)">100</div>
+          <div class="goal-chip" data-goal="500" onclick="setGoal(500)">500</div>
+        </div>
+
+        <div class="counter-actions">
+          <button class="ghost-btn" onclick="resetActiveZikr()">↺ Reset</button>
+          <button class="ghost-btn" onclick="openCustomZikrPrompt()">+ Custom Zikr</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-sub" style="margin-top:0;">Noor Garden 🌸</div>
+        <div class="subtle">Today's blooms — keep counting to grow your garden</div>
+        <div class="garden-bed" id="fullGarden"></div>
+      </div>
+    </section>
+
+    <!-- DUA POCKET -->
+    <section class="screen" id="screen-dua">
+      <h1 class="page-title">Dua Pocket 🤲</h1>
+      <div class="subtle" style="margin-bottom:14px;">Your private space for personal duas</div>
+
+      <div class="cat-filters" id="duaCatFilters"></div>
+      <div id="duaList"></div>
+      <div class="subtle" id="duaEmptyMsg" style="text-align:center; padding:30px 0; display:none;">No duas yet. Tap + to write your first dua.</div>
+    </section>
+
+    <!-- SHUKR NAMA -->
+    <section class="screen" id="screen-shukr">
+      <h1 class="page-title">Shukr Nama 🤍</h1>
+      <div class="subtle" style="margin-bottom:16px;">A few quiet questions for today</div>
+
+      <div class="card" id="shukrFormCard">
+        <div class="prompt-block">
+          <div class="prompt-q">What am I grateful to Allah for today?</div>
+          <textarea id="shukr1" rows="2" placeholder="Write here..."></textarea>
+        </div>
+        <div class="prompt-block">
+          <div class="prompt-q">What was the most beautiful moment of today?</div>
+          <textarea id="shukr2" rows="2" placeholder="Write here..."></textarea>
+        </div>
+        <div class="prompt-block">
+          <div class="prompt-q">What do I want to do better tomorrow?</div>
+          <textarea id="shukr3" rows="2" placeholder="Write here..."></textarea>
+        </div>
+        <button class="primary-btn" onclick="saveShukr()">Save Today's Shukr</button>
+        <div class="success-msg" id="shukrSuccess" style="display:none;">Alhamdulillah for another day filled with blessings.</div>
+      </div>
+
+      <div class="section-sub">Previous Entries</div>
+      <div id="shukrHistory"></div>
+    </section>
+
+    <!-- MY JOURNEY -->
+    <section class="screen" id="screen-journey">
+      <h1 class="page-title">My Journey 🌙</h1>
+      <div class="subtle" style="margin-bottom:16px;">Your spiritual progress, all in one place</div>
+
+      <div class="journey-grid">
+        <div class="journey-box"><div class="journey-num" id="jWeekTotal">0</div><div class="journey-label">This Week's Zikr</div></div>
+        <div class="journey-box"><div class="journey-num" id="jMonthTotal">0</div><div class="journey-label">This Month's Zikr</div></div>
+        <div class="journey-box"><div class="journey-num" id="jStreak">0</div><div class="journey-label">Day Streak</div></div>
+        <div class="journey-box"><div class="journey-num" id="jGoalsCompleted">0</div><div class="journey-label">Goals Completed</div></div>
+      </div>
+
+      <div class="card">
+        <div class="section-sub" style="margin-top:0;">Dua Pocket</div>
+        <div class="stat-row">
+          <div class="stat-box"><div class="stat-num" id="jDuasTotal">0</div><div class="stat-label">Total Duas</div></div>
+          <div class="stat-box"><div class="stat-num" id="jDuasAccepted">0</div><div class="stat-label">Accepted 🤍</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="section-sub" style="margin-top:0;">Shukr Nama</div>
+        <div class="subtle" id="jShukrCount">0 gratitude entries written</div>
+      </div>
+
+      <div class="card">
+        <div class="section-sub" style="margin-top:0;">Garden Progress 🌸</div>
+        <div class="subtle" id="jGardenTotal">0 lifetime blooms</div>
+      </div>
+    </section>
+
+  </main>
+
+  <div class="fab" id="duaFab" style="display:none;" onclick="openDuaModal()">+</div>
+
+  <nav class="bottom-nav">
+    <div class="nav-item active" data-screen="home" onclick="goTo('home')"><div class="nav-icon">🏠</div>Home</div>
+    <div class="nav-item" data-screen="tasbih" onclick="goTo('tasbih')"><div class="nav-icon">📿</div>Tasbih</div>
+    <div class="nav-item" data-screen="dua" onclick="goTo('dua')"><div class="nav-icon">🤲</div>Dua</div>
+    <div class="nav-item" data-screen="shukr" onclick="goTo('shukr')"><div class="nav-icon">🤍</div>Shukr</div>
+    <div class="nav-item" data-screen="journey" onclick="goTo('journey')"><div class="nav-icon">🌙</div>Journey</div>
+  </nav>
+</div>
+
+<!-- Dua Modal -->
+<div class="modal-overlay" id="duaModal">
+  <div class="modal">
+    <h3 id="duaModalTitle">Add a Dua</h3>
+    <div class="field-label">Your Dua</div>
+    <textarea id="duaInput" rows="4" placeholder="Write your dua..."></textarea>
+    <div class="field-label">Category</div>
+    <select id="duaCategory">
+      <option>Family</option>
+      <option>Career</option>
+      <option>Health</option>
+      <option>Deen</option>
+      <option>Personal</option>
+    </select>
+    <div class="modal-btns">
+      <button class="secondary-btn" onclick="closeDuaModal()">Cancel</button>
+      <button class="primary-btn" onclick="saveDua()">Save Dua</button>
+    </div>
+  </div>
+</div>
+
+<!-- Audio bar modal -->
+<div class="modal-overlay" id="audioModal">
+  <div class="modal">
+    <h3>Background Naat 🎵</h3>
+    <div class="subtle" style="margin-bottom:14px;">Add your own licensed naat/nasheed audio file to personalize this. Place an mp3 at <code>audio/naat.mp3</code> next to this file, or use the player below once added.</div>
+    <div class="audio-bar">
+      <button class="play-toggle" id="playToggleBtn" onclick="togglePlay()">▶</button>
+      <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.5" oninput="setVolume(this.value)">
+    </div>
+    <audio id="naatAudio" src="audio/naat.mp3" loop></audio>
+    <div class="modal-btns">
+      <button class="primary-btn" onclick="closeAudioModal()">Done</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ================= STATE ================= */
+const STORAGE_KEY = 'digitalTasbihData';
+const today = () => new Date().toISOString().slice(0,10);
+
+function defaultData(){
+  return {
+    bismillahDone:false,
+    theme:'day',
+    zikrs:[
+      {id:'durood', name:'Durood Shareef', count:0, goal:33},
+      {id:'subhanallah', name:'SubhanAllah', count:0, goal:33},
+      {id:'alhamdulillah', name:'Alhamdulillah', count:0, goal:33},
+      {id:'allahuakbar', name:'Allahu Akbar', count:0, goal:33}
+    ],
+    activeZikr:'subhanallah',
+    dailyLog:{}, // {date: totalCount}
+    lastActiveDate:null,
+    streak:0,
+    goalsCompletedLog:{}, // {date: [zikrIds completed]}
+    gardenLifetime:0,
+    duas:[], // {id, text, category, date, accepted}
+    shukrEntries:{}, // {date: {1,2,3}}
+  };
+}
+
+let data = loadData();
+
+function loadData(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return defaultData();
+    const parsed = JSON.parse(raw);
+    const d = Object.assign(defaultData(), parsed);
+    d.zikrs = parsed.zikrs && parsed.zikrs.length ? parsed.zikrs : defaultData().zikrs;
+    return d;
+  }catch(e){ return defaultData(); }
+}
+function saveData(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+/* ================= STREAK / DAILY ROLLOVER ================= */
+function ensureDailyRollover(){
+  const t = today();
+  if(data.lastActiveDate !== t){
+    // compute streak
+    if(data.lastActiveDate){
+      const prev = new Date(data.lastActiveDate);
+      const cur = new Date(t);
+      const diffDays = Math.round((cur - prev)/86400000);
+      if(diffDays === 1 && (data.dailyLog[data.lastActiveDate]||0) > 0){
+        data.streak += 1;
+      } else if(diffDays > 1){
+        data.streak = 0;
+      }
+    }
+    data.lastActiveDate = t;
+    if(!data.dailyLog[t]) data.dailyLog[t] = 0;
+    saveData();
+  }
+}
+
+/* ================= NAVIGATION ================= */
+function goTo(screen){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+screen).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active', n.dataset.screen===screen));
+  document.getElementById('duaFab').style.display = screen==='dua' ? 'flex' : 'none';
+  if(screen==='journey') renderJourney();
+  if(screen==='dua') renderDuas();
+  if(screen==='shukr') renderShukr();
+  if(screen==='home') renderHome();
+  if(screen==='tasbih') renderTasbih();
+}
+
+/* ================= BISMILLAH GATE ================= */
+function beginBismillah(){
+  data.bismillahDone = true;
+  saveData();
+  document.getElementById('gate').style.display='none';
+  attemptAutoplayNaat();
+}
+function attemptAutoplayNaat(){
+  const a = document.getElementById('naatAudio');
+  const btn = document.getElementById('playToggleBtn');
+  try{
+    const p = a.play();
+    if(p && typeof p.then === 'function'){
+      p.then(()=>{ if(btn) btn.textContent = '⏸'; }).catch(()=>{
+        // No audio file added yet, or browser blocked it — fail silently here.
+      });
+    }
+  }catch(e){
+    // Fail silently — user can still start it manually from the music icon.
+  }
+}
+function checkGate(){
+  // Gate is shown on every app open by design — nothing to skip here.
+}
+
+/* ================= THEME ================= */
+function toggleTheme(){
+  data.theme = data.theme === 'day' ? 'night' : 'day';
+  applyTheme();
+  saveData();
+}
+function applyTheme(){
+  document.body.setAttribute('data-theme', data.theme);
+  document.getElementById('themeIconBtn').textContent = data.theme==='day' ? '🌤️' : '🌙';
+}
+function buildStars(){
+  const c = document.getElementById('stars');
+  let html='';
+  for(let i=0;i<28;i++){
+    const top = Math.random()*100, left = Math.random()*100, delay = Math.random()*3;
+    html += `<div class="star" style="top:${top}%; left:${left}%; animation-delay:${delay}s;"></div>`;
+  }
+  c.innerHTML = html;
+}
+
+/* ================= SOUND (synthesized, no external file) ================= */
+let audioCtx;
+function playSoftTone(){
+  try{
+    audioCtx = audioCtx || new (window.AudioContext||window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.frequency.value = 660;
+    osc.type = 'sine';
+    gain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.06, audioCtx.currentTime+0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime+0.35);
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.start(); osc.stop(audioCtx.currentTime+0.35);
+  }catch(e){}
+}
+function vibrateIfSupported(ms){
+  if(navigator.vibrate){ try{ navigator.vibrate(ms); }catch(e){} }
+}
+
+/* ================= TASBIH ================= */
+function getActiveZikr(){
+  return data.zikrs.find(z=>z.id===data.activeZikr) || data.zikrs[0];
+}
+function renderZikrTabs(){
+  const c = document.getElementById('zikrTabs');
+  c.innerHTML = data.zikrs.map(z=>
+    `<div class="zikr-tab ${z.id===data.activeZikr?'active':''}" onclick="selectZikr('${z.id}')">${z.name}</div>`
+  ).join('') + `<div class="zikr-tab" onclick="openCustomZikrPrompt()">+ Add</div>`;
+}
+function selectZikr(id){
+  data.activeZikr = id;
+  saveData();
+  renderTasbih();
+}
+function openCustomZikrPrompt(){
+  const name = prompt('Name your custom zikr:');
+  if(name && name.trim()){
+    const id = 'custom_'+Date.now();
+    data.zikrs.push({id, name:name.trim(), count:0, goal:33});
+    data.activeZikr = id;
+    saveData();
+    renderTasbih();
+  }
+}
+function tapZikr(){
+  const z = getActiveZikr();
+  z.count += 1;
+  ensureDailyRollover();
+  const t = today();
+  data.dailyLog[t] = (data.dailyLog[t]||0) + 1;
+  data.gardenLifetime += 1;
+
+  // milestone feedback every 33
+  if(z.count % 33 === 0){
+    playSoftTone();
+    vibrateIfSupported(40);
+  }
+  // goal completion
+  if(z.count === z.goal){
+    if(!data.goalsCompletedLog[t]) data.goalsCompletedLog[t] = [];
+    if(!data.goalsCompletedLog[t].includes(z.id)){
+      data.goalsCompletedLog[t].push(z.id);
+      celebrateGoal();
+    }
+  }
+  saveData();
+  renderTasbih();
+  renderHome();
+}
+function celebrateGoal(){
+  const btn = document.getElementById('tapBtn');
+  btn.style.transform = 'scale(1.1)';
+  setTimeout(()=>{ btn.style.transform=''; }, 250);
+}
+function setGoal(g){
+  getActiveZikr().goal = g;
+  saveData();
+  renderTasbih();
+}
+function resetActiveZikr(){
+  if(confirm('Reset this zikr count to 0?')){
+    getActiveZikr().count = 0;
+    saveData();
+    renderTasbih();
+  }
+}
+function renderTasbih(){
+  renderZikrTabs();
+  const z = getActiveZikr();
+  document.getElementById('activeZikrName').textContent = z.name;
+  document.getElementById('activeZikrCount').textContent = z.count;
+  document.getElementById('goalLabel').textContent = `Goal: ${z.goal}`;
+  const pct = Math.min(100, (z.count % z.goal === 0 && z.count>0 ? 100 : (z.count % z.goal)/z.goal*100));
+  document.getElementById('progressFill').style.width = pct+'%';
+  document.querySelectorAll('.goal-chip').forEach(c=>{
+    c.classList.toggle('active', Number(c.dataset.goal)===z.goal);
+  });
+  renderGarden('fullGarden', 12, todayTotal());
+}
+function todayTotal(){
+  ensureDailyRollover();
+  return data.dailyLog[today()] || 0;
+}
+
+/* ================= NOOR GARDEN ================= */
+function renderGarden(elId, flowerCount, countForBloom){
+  const el = document.getElementById(elId);
+  if(!el) return;
+  const bloomThreshold = 5; // every N zikr blooms one flower
+  const bloomed = Math.min(flowerCount, Math.floor(countForBloom / bloomThreshold));
+  let html='';
+  for(let i=0;i<flowerCount;i++){
+    html += `<div class="flower ${i<bloomed?'bloomed':''}"><div class="bloom"></div><div class="stem"></div></div>`;
+  }
+  el.innerHTML = html;
+}
+
+/* ================= HOME ================= */
+const QUOTES = [
+  "\u201cVerily, in the remembrance of Allah do hearts find rest.\u201d \u2014 Quran 13:28",
+  "\u201cAnd He found you lost and guided you.\u201d \u2014 Quran 93:7",
+  "\u201cIndeed, with hardship comes ease.\u201d \u2014 Quran 94:6",
+  "\u201cMy Lord, increase me in knowledge.\u201d \u2014 Quran 20:114",
+  "\u201cSo remember Me; I will remember you.\u201d \u2014 Quran 2:152"
+];
+function renderHome(){
+  ensureDailyRollover();
+  document.getElementById('homeTodayCount').textContent = todayTotal();
+  document.getElementById('homeStreak').textContent = data.streak;
+  renderGarden('miniGarden', 7, todayTotal());
+  const idx = new Date().getDate() % QUOTES.length;
+  document.getElementById('dailyQuote').textContent = QUOTES[idx];
+}
+
+/* ================= DUA POCKET ================= */
+let duaEditId = null;
+let duaFilter = 'All';
+function openDuaModal(editId){
+  duaEditId = editId || null;
+  document.getElementById('duaModalTitle').textContent = editId ? 'Edit Dua' : 'Add a Dua';
+  if(editId){
+    const d = data.duas.find(x=>x.id===editId);
+    document.getElementById('duaInput').value = d.text;
+    document.getElementById('duaCategory').value = d.category;
+  } else {
+    document.getElementById('duaInput').value = '';
+    document.getElementById('duaCategory').value = 'Family';
+  }
+  document.getElementById('duaModal').classList.add('active');
+}
+function closeDuaModal(){ document.getElementById('duaModal').classList.remove('active'); }
+function saveDua(){
+  const text = document.getElementById('duaInput').value.trim();
+  const category = document.getElementById('duaCategory').value;
+  if(!text) return;
+  if(duaEditId){
+    const d = data.duas.find(x=>x.id===duaEditId);
+    d.text = text; d.category = category;
+  } else {
+    data.duas.unshift({id:'dua_'+Date.now(), text, category, date:today(), accepted:false});
+  }
+  saveData();
+  closeDuaModal();
+  renderDuas();
+}
+function deleteDua(id){
+  if(confirm('Delete this dua?')){
+    data.duas = data.duas.filter(d=>d.id!==id);
+    saveData();
+    renderDuas();
+  }
+}
+function toggleAccepted(id){
+  const d = data.duas.find(x=>x.id===id);
+  d.accepted = !d.accepted;
+  saveData();
+  renderDuas();
+}
+function renderDuaFilters(){
+  const cats = ['All','Family','Career','Health','Deen','Personal'];
+  document.getElementById('duaCatFilters').innerHTML = cats.map(c=>
+    `<div class="zikr-tab ${duaFilter===c?'active':''}" onclick="setDuaFilter('${c}')">${c}</div>`
+  ).join('');
+}
+function setDuaFilter(c){ duaFilter = c; renderDuas(); }
+function renderDuas(){
+  renderDuaFilters();
+  let list = data.duas;
+  if(duaFilter!=='All') list = list.filter(d=>d.category===duaFilter);
+  const el = document.getElementById('duaList');
+  document.getElementById('duaEmptyMsg').style.display = list.length ? 'none' : 'block';
+  el.innerHTML = list.map(d=>`
+    <div class="dua-card ${d.accepted?'accepted':''}">
+      <div class="dua-meta">
+        <span class="dua-cat">${d.category}</span>
+        <span class="dua-date">${d.date}</span>
+      </div>
+      <div class="dua-text">${escapeHtml(d.text)}</div>
+      ${d.accepted ? '<div class="accepted-badge">Alhamdulillah, Accepted 🤍</div>' : ''}
+      <div class="dua-actions">
+        <button class="mini-btn" onclick="openDuaModal('${d.id}')">Edit</button>
+        <button class="mini-btn accept" onclick="toggleAccepted('${d.id}')">${d.accepted?'Unmark':'Mark Accepted'}</button>
+        <button class="mini-btn danger" onclick="deleteDua('${d.id}')">Delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+function escapeHtml(s){
+  return s.replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+/* ================= SHUKR NAMA ================= */
+function saveShukr(){
+  const t = today();
+  const e1 = document.getElementById('shukr1').value.trim();
+  const e2 = document.getElementById('shukr2').value.trim();
+  const e3 = document.getElementById('shukr3').value.trim();
+  if(!e1 && !e2 && !e3) return;
+  data.shukrEntries[t] = {q1:e1, q2:e2, q3:e3};
+  saveData();
+  document.getElementById('shukrSuccess').style.display='block';
+  renderShukr();
+}
+function renderShukr(){
+  const t = today();
+  const entry = data.shukrEntries[t];
+  if(entry){
+    document.getElementById('shukr1').value = entry.q1||'';
+    document.getElementById('shukr2').value = entry.q2||'';
+    document.getElementById('shukr3').value = entry.q3||'';
+    document.getElementById('shukrSuccess').style.display='block';
+  } else {
+    document.getElementById('shukrSuccess').style.display='none';
+  }
+  const dates = Object.keys(data.shukrEntries).sort().reverse().filter(d=>d!==t);
+  const el = document.getElementById('shukrHistory');
+  if(!dates.length){
+    el.innerHTML = '<div class="subtle" style="text-align:center; padding:20px 0;">Write your first entry today.</div>';
+    return;
+  }
+  el.innerHTML = dates.map(d=>{
+    const e = data.shukrEntries[d];
+    return `<div class="shukr-entry">
+      <span class="dua-date">${d}</span>
+      ${e.q1?`<div style="margin-top:6px; font-size:13.5px;"><b>Grateful for:</b> ${escapeHtml(e.q1)}</div>`:''}
+      ${e.q2?`<div style="margin-top:4px; font-size:13.5px;"><b>Best moment:</b> ${escapeHtml(e.q2)}</div>`:''}
+      ${e.q3?`<div style="margin-top:4px; font-size:13.5px;"><b>Tomorrow:</b> ${escapeHtml(e.q3)}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+/* ================= MY JOURNEY ================= */
+function renderJourney(){
+  ensureDailyRollover();
+  const now = new Date();
+  const dayOfWeek = now.getDay();
+  const weekStart = new Date(now); weekStart.setDate(now.getDate()-dayOfWeek);
+  let weekTotal=0, monthTotal=0;
+  Object.entries(data.dailyLog).forEach(([d,count])=>{
+    const dt = new Date(d);
+    if(dt >= weekStart) weekTotal += count;
+    if(dt.getMonth()===now.getMonth() && dt.getFullYear()===now.getFullYear()) monthTotal += count;
+  });
+  document.getElementById('jWeekTotal').textContent = weekTotal;
+  document.getElementById('jMonthTotal').textContent = monthTotal;
+  document.getElementById('jStreak').textContent = data.streak;
+  const goalsCompleted = Object.values(data.goalsCompletedLog).reduce((a,arr)=>a+arr.length,0);
+  document.getElementById('jGoalsCompleted').textContent = goalsCompleted;
+  document.getElementById('jDuasTotal').textContent = data.duas.length;
+  document.getElementById('jDuasAccepted').textContent = data.duas.filter(d=>d.accepted).length;
+  document.getElementById('jShukrCount').textContent = Object.keys(data.shukrEntries).length + ' gratitude entries written';
+  document.getElementById('jGardenTotal').textContent = data.gardenLifetime + ' lifetime blooms';
+}
+
+/* ================= AUDIO ================= */
+function toggleAudio(){ document.getElementById('audioModal').classList.add('active'); }
+function closeAudioModal(){ document.getElementById('audioModal').classList.remove('active'); }
+function togglePlay(){
+  const a = document.getElementById('naatAudio');
+  const btn = document.getElementById('playToggleBtn');
+  if(a.paused){
+    try{
+      const p = a.play();
+      if(p && typeof p.then === 'function'){
+        p.then(()=>{ btn.textContent='⏸'; }).catch(()=>{
+          alert('Audio file not found. Add audio/naat.mp3 to the folder next to this file.');
+        });
+      } else {
+        btn.textContent='⏸';
+      }
+    }catch(e){
+      alert('Audio file not found. Add audio/naat.mp3 to the folder next to this file.');
+    }
+  } else {
+    a.pause(); btn.textContent='▶';
+  }
+}
+function setVolume(v){ document.getElementById('naatAudio').volume = v; }
+
+/* ================= GREETING ================= */
+function setGreeting(){
+  const h = new Date().getHours();
+  let g = 'Assalamu Alaikum';
+  document.getElementById('greetingText').textContent = g;
+}
+
+/* ================= INIT ================= */
+function init(){
+  applyTheme();
+  buildStars();
+  checkGate();
+  ensureDailyRollover();
+  setGreeting();
+  renderHome();
+  renderTasbih();
+  renderDuas();
+  renderShukr();
+}
+init();
+</script>
+</body>
+</html>
